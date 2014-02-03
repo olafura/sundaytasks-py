@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+import sundaytasks.main
+import argparse
+
+if __name__ == "__main__":
+    description = """SundayTask runs your changes on CouchDB through a
+    plugin system set up by you.
+    """
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('--url', help='The base url to watch',
+                         default='http://localhost:5984')
+    parser.add_argument('--db', help='The database to watch',
+                         default='testing')
+    parser.add_argument('-v', '--view', help='The view to filter',
+                         default=False)
+    parser.add_argument('-s', '--start',
+                         help='The starting point for plugins',
+                         default='start')
+    args = parser.parse_args()
+    sundaytasks.main.run(args.url,args.db, args.view, args.start)
