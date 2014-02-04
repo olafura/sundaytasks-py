@@ -22,9 +22,9 @@ class Changes(object):
     def __init__(self, url, database):
         self._url = url
         self._database = database
-        self._run()
         self._seq = 0
         self._nid = 0
+        self._run()
 
     def _run(self):
         """The main running function of the Changes module
