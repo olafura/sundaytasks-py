@@ -3,39 +3,39 @@ class Queue(object):
 
     """
     def __init__(self):
-        self._inqueue = {"start": []}
-        self._outqueue = {}
+        self._subqueue = {"start": []}
+        self._pubqueue = {}
 
-    def add_in(self, key, task):
-        if key in self._inqueue:
-            self._inqueue[key].append(task)
+    def add_sub(self, sub, task):
+        if sub in self._subqueue:
+            self._subqueue[sub].append(task)
         else:
-            self._inqueue[key] = [task]
+            self._subqueue[sub] = [task]
 
-    def get_in(self, key):
-        if key in self._inqueue:
-            return self._inqueue[key]
+    def get_sub(self, sub):
+        if sub in self._subqueue:
+            return self._subqueue[sub]
         else:
             return []
 
-    def get_all_in(self):
-        return self._inqueue
+    def get_all_sub(self):
+        return self._subqueue
 
-    def add_out(self, sub, pub, task):
-        if sub in self._outqueue:
-            if pub in self._outqueue[sub]:
-                self._outqueue[sub][pub].append(task)
+    def add_pub(self, sub, pub, task):
+        if sub in self._pubqueue:
+            if pub in self._pubqueue[sub]:
+                self._pubqueue[sub][pub].append(task)
             else:
-                self._outqueue[sub][pub] = [task]
+                self._pubqueue[sub][pub] = [task]
         else:
-            self._outqueue[sub] = {}
-            self._outqueue[sub][pub] = [task]
+            self._pubqueue[sub] = {}
+            self._pubqueue[sub][pub] = [task]
 
-    def get_out(self, sub, pub):
-        if sub in self._outqueue and pub in self._outqueue[sub]:
-            return self._outqueue[sub][pub]
+    def get_pub(self, sub, pub):
+        if sub in self._pubqueue and pub in self._pubqueue[sub]:
+            return self._pubqueue[sub][pub]
         else:
             return []
 
-    def get_all_out(self):
-        return self._outqueue
+    def get_all_pub(self):
+        return self._pubqueue

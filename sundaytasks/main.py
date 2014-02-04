@@ -38,17 +38,17 @@ def run(url, database, view, starting_point):
         logging.debug("Plugin name: %s", str(pluginobject.name))
         plugin = pluginobject.load()
         if "sub" in plugin and "pub" in plugin:
-            queue.add_in(plugin['sub'], plugin)
-            queue.add_out(plugin['sub'], plugin['pub'], plugin['name'])
+            queue.add_sub(plugin['sub'], plugin)
+            queue.add_pub(plugin['sub'], plugin['pub'], plugin['name'])
     extensions = {"provider": {},"exit":{}}
     for extobject in iter_ep(group='sundaytasks.extension', name=None):
         logging.debug("Extension name: %s", str(extobject.name))
         extension = extobject.load()
         extensions[extension['type']][extobject.name] = extension
-    allpluginsout = queue.get_all_out()
-    allpluginsin = queue.get_all_in()
-    logging.debug("allplugins out: %s", str(allpluginsout))
-    logging.debug("allplugins in: %s", str(allpluginsin))
+    allpluginspub = queue.get_all_pub()
+    allpluginssub = queue.get_all_sub()
+    logging.debug("allplugins pub: %s", str(allpluginspub))
+    logging.debug("allplugins sub: %s", str(allpluginssub))
     logging.debug("extensions: %s", str(extensions))
     package_directory = os.path.dirname(os.path.abspath(__file__))
     changespath = os.path.join(package_directory, "changes.py")

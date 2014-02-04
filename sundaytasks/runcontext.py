@@ -61,7 +61,7 @@ def callback(plugin, parent, doc, provider):
             parent.finished[plugin['sub']][plugin['pub']] = [plugin['name']]
         logging.debug("finished: %s", str(parent.finished))
         finished = True
-        outkeys = parent.queue.get_out(plugin['sub'], plugin['pub'])
+        outkeys = parent.queue.get_pub(plugin['sub'], plugin['pub'])
         logging.debug("outkeys: %s", str(outkeys))
         logging.debug("_finished: %s",
                       str(parent.finished[plugin['sub']][plugin['pub']]))
@@ -114,7 +114,7 @@ class RunContext(object):
 
         """
         logging.debug("key: %s", str(key))
-        plugins = self.queue.get_in(key)
+        plugins = self.queue.get_sub(key)
         logging.debug("plugins: %s", str(plugins))
         for plugin in plugins:
             logging.debug("plugin_name: %s", str(plugin['name']))
