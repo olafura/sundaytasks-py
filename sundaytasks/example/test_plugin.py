@@ -6,7 +6,6 @@ import json
 
 @gen.coroutine
 def main(plugin):
-    #print("plugin:",plugin['receiver'])
     response = yield plugin['receiver']("Prufa")
     print("Results: \n%s" % json.dumps(response, sort_keys=True,
     indent=4, separators=(',', ': ')))
