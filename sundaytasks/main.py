@@ -26,6 +26,13 @@ logging.basicConfig(format = FORMAT,
                     level = LEVEL)
 
 def run(url, database, view, starting_point):
+    """Used to run the plugins that are installed based on the starting point
+    @param url Base url for the CouchDB instance your monitoring
+    @param database Name of the database to monitor
+    @param view View to filter by
+    @param starting_point The starting point of the plugins
+
+    """
     queue = Queue()
     for pluginobject in iter_ep(group='sundaytasks.plugin', name=None):
         logging.debug("Plugin name: %s", str(pluginobject.name))

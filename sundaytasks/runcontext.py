@@ -8,6 +8,18 @@ import logging
 
 @gen.coroutine
 def callback(plugin, parent, doc, provider):
+    """This function handles calling the plugins and spawning new plugins
+    based on the event system
+
+    @param plugin The plugin data stucture which includes all the relevant
+                  information
+    @param parent The parent is the RunContext which called the callback
+
+    @param doc The doc that is passed to the plugin
+
+    @param provider An optional provider which gets some data for you from
+                    CouchDB like tokens
+    """
     logging.debug("callback: %s", str(plugin['name']))
     logging.debug("doc: %s", str(doc))
     logging.debug("provider: %s", str(provider))
@@ -63,6 +75,18 @@ def callback(plugin, parent, doc, provider):
 
 
 class RunContext(object):
+    """The runcontext which provides an way of calling the plugin functions
+    in way that does not interfere with the main loop
+
+    @param queue The queue that contains the plugins to run
+
+    @param extensions Available extensions to the plugins
+
+    @param doc The doc that is passed to the plugins
+
+    @param start The starting point used to decide where to begin
+
+    """
     def __init__(self, queue, extensions, doc, start):
         self.finished = {}
         self.response = {}
@@ -72,6 +96,9 @@ class RunContext(object):
 
     @contextlib.contextmanager
     def handle_events(self):
+        """This function provides the context that the plugins are running in
+
+        """
         try:
             yield
         except Exception, e:
@@ -79,6 +106,13 @@ class RunContext(object):
             traceback.print_exc()
 
     def run(self, key, doc):
+        """The main running function
+
+        @param key The key in the queue to run next
+
+        @param doc The document passed to the plugin
+
+        """
         logging.debug("key: %s", str(key))
         plugins = self.queue.get_in(key)
         logging.debug("plugins: %s", str(plugins))

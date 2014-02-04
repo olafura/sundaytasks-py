@@ -1,4 +1,7 @@
 class Queue(object):
+    """The queue for the plugins both the pub and sub
+
+    """
     def __init__(self):
         self._inqueue = {"start": []}
         self._outqueue = {}

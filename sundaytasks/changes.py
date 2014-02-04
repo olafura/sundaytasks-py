@@ -1,3 +1,10 @@
+"""@package sundaytasks.changes
+
+This monitors the changes of CouchDB, this is a self contained part and is run
+in it's own process so it does not interfere with the main loop.
+
+@author Olafur Arason <olafura@olafura.com>
+"""
 from tornado import gen
 from tornado import httpclient
 from tornado.ioloop import IOLoop
@@ -7,6 +14,11 @@ import sys
 
 @gen.coroutine
 class Changes(object):
+    """The changes module that monitors CouchDB
+    @param url The base url of the CouchDB instance
+    @param database The name of the database to monitor
+
+    """
     def __init__(self, url, database):
         self._url = url
         self._database = database
@@ -15,6 +27,9 @@ class Changes(object):
         self._nid = 0
 
     def _run(self):
+        """The main running function of the Changes module
+
+        """
         url = self._url+"/"+self._database
         url += "/_changes?feed=eventsource&include_docs=true"
         req = httpclient.HTTPRequest(
@@ -32,6 +47,12 @@ class Changes(object):
         #response = yield http_client.fetch(url+"/"+database)
 
     def handle_event(self, response):
+        """Handle event gets the data from the changes feed and prints it out
+        on the stdout so it can be picked up by the sundaytask.main
+
+        @param response It gets a response from the http_client
+
+        """
         #print("handle_event", response)
         lines = response.split("\n")
         if len(lines) > 2:
@@ -63,10 +84,19 @@ class Changes(object):
                     #   print("Repeat")
 
     def async_callback(self, response):
+        """Async callback is to handle events that like loosing connection
+        and it restarts the function again
+
+        @param response It gets a response with the error
+
+        """
         #print("async_callback",response)
         self._run()
 
 def main():
+    """The main running function
+
+    """
     if len(sys.argv) > 1:
         arg_url = sys.argv[1]
         arg_database = sys.argv[2]
