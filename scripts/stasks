@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import sundaytasks.main
+import logging
 import argparse
+FORMAT = '%(asctime)s %(funcName)s %(levelname)-8s %(message)s'
+LEVEL = logging.INFO
 
 if __name__ == "__main__":
     description = """SundayTask runs your changes on CouchDB through a
@@ -16,5 +19,10 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--start',
                          help='The starting point for plugins',
                          default='start')
+    parser.add_argument('-d', '--debug', action='store_true',
+                         help='Turn on Debug')
     args = parser.parse_args()
+    if args.debug:
+        LEVEL = logging.DEBUG
+        logging.basicConfig(format = FORMAT, level = LEVEL)
     sundaytasks.main.run(args.url,args.db, args.view, args.start)

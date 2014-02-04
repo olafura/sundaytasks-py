@@ -20,10 +20,6 @@ import contextlib
 import subprocess
 import traceback
 import logging
-FORMAT = '%(asctime)s %(funcName)s %(levelname)-8s %(message)s'
-LEVEL = logging.DEBUG
-logging.basicConfig(format = FORMAT,
-                    level = LEVEL)
 
 def run(url, database, view, starting_point):
     """Used to run the plugins that are installed based on the starting point
