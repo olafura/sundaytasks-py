@@ -6,15 +6,15 @@ class Queue(object):
         self._subqueue = {"start": []}
         self._pubqueue = {}
 
-    def add_sub(self, sub, task):
-        """Adds a plugin name and task to the sub queue
+    def add_sub(self, sub, plugin):
+        """Adds a plugin name and plugin to the sub queue
 
         @param sub The name of the plugin
         """
         if sub in self._subqueue:
-            self._subqueue[sub].append(task)
+            self._subqueue[sub].append(plugin)
         else:
-            self._subqueue[sub] = [task]
+            self._subqueue[sub] = [plugin]
 
     def get_sub(self, sub):
         if sub in self._subqueue:
@@ -25,15 +25,15 @@ class Queue(object):
     def get_all_sub(self):
         return self._subqueue
 
-    def add_pub(self, sub, pub, task):
+    def add_pub(self, sub, pub, plugin):
         if sub in self._pubqueue:
             if pub in self._pubqueue[sub]:
-                self._pubqueue[sub][pub].append(task)
+                self._pubqueue[sub][pub].append(plugin)
             else:
-                self._pubqueue[sub][pub] = [task]
+                self._pubqueue[sub][pub] = [plugin]
         else:
             self._pubqueue[sub] = {}
-            self._pubqueue[sub][pub] = [task]
+            self._pubqueue[sub][pub] = [plugin]
 
     def get_pub(self, sub, pub):
         if sub in self._pubqueue and pub in self._pubqueue[sub]:
