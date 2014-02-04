@@ -7,6 +7,10 @@ class Queue(object):
         self._pubqueue = {}
 
     def add_sub(self, sub, task):
+        """Adds a plugin name and task to the sub queue
+
+        @param sub The name of the plugin
+        """
         if sub in self._subqueue:
             self._subqueue[sub].append(task)
         else:
