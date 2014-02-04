@@ -52,8 +52,9 @@ def run(url, database, view, starting_point):
     for response in iter(changes.stdout.readline, ''):
         logging.debug("line")
         logging.debug("response: %s", str(response))
+        json_response = json_decode(response)
         try:
-            runcontext = RunContext(queue, extensions, json_decode(response)["doc"],
+            runcontext = RunContext(queue, extensions, json_response["doc"],
                         starting_point)
         except Exception, e:
             logging.debug("Exception main: %s", str(e))
