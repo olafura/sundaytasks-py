@@ -1,7 +1,7 @@
 """@package sundaytasks.changes
 
 This monitors the changes of CouchDB, this is a self contained part and is run
-in it's own process so it does not interfere with the main loop.
+in its own process so it does not interfere with the main loop.
 
 @author Olafur Arason <olafura@olafura.com>
 """
@@ -84,7 +84,7 @@ class Changes(object):
                     #   print("Repeat")
 
     def async_callback(self, response):
-        """Async callback is to handle events that like loosing connection
+        """Async callback is to handle events that like losing connection
         and it restarts the function again
 
         @param response It gets a response with the error
