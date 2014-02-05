@@ -11,6 +11,7 @@ from tornado.ioloop import IOLoop
 from tornado.escape import json_decode
 import re
 import sys
+import signal
 
 @gen.coroutine
 class Changes(object):
@@ -100,8 +101,13 @@ def main():
     if len(sys.argv) > 1:
         arg_url = sys.argv[1]
         arg_database = sys.argv[2]
+        instance = IOLoop.instance()
+        def shuttingdown(sig, frame):
+            logging.info("Stopping SundayTasks Changes: %s", sig)
+            instance.stop()
+        signal.signal(signal.SIGINT, shuttingdown)
+        signal.signal(signal.SIGTERM, shuttingdown)
         try:
-            instance = IOLoop.instance()
             Changes(arg_url, arg_database)
             instance.start()
         except Exception, e:

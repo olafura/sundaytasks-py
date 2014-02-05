@@ -20,6 +20,7 @@ import contextlib
 import subprocess
 import traceback
 import logging
+import signal
 
 def run(url, database, view, starting_point):
     """Used to run the plugins that are installed based on the starting point
@@ -52,6 +53,11 @@ def run(url, database, view, starting_point):
     changes = subprocess.Popen(args,
                    stdout=subprocess.PIPE,
                    )
+    def shuttingdown(sig, frame):
+        logging.info("Stopping SundayTasks: %s", sig)
+        changes.kill()
+    signal.signal(signal.SIGINT, shuttingdown)
+    signal.signal(signal.SIGTERM, shuttingdown)
     for response in iter(changes.stdout.readline, ''):
         logging.debug("line")
         logging.debug("response: %s", str(response))
