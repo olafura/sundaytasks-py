@@ -20,7 +20,6 @@ def main(plugin, args):
 
 @gen.coroutine
 def single(plugin, doc):
-    #iplugin = __import__("%s" % sys.argv[1])
     iplugin = __import__("%s" % plugin)
     plugin = iplugin.PLUGIN
     if not doc:
