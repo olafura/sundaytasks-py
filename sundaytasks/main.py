@@ -22,6 +22,24 @@ import traceback
 import logging
 import signal
 
+def get_extensions():
+    extensions = {"provider": {},"exit":{}}
+    for extobject in iter_ep(group='sundaytasks.extension', name=None):
+        logging.debug("Extension name: %s", str(extobject.name))
+        extension = extobject.load()
+        extensions[extension['type']][extobject.name] = extension
+    return extensions
+
+def get_plugins():
+    queue = Queue()
+    for pluginobject in iter_ep(group='sundaytasks.plugin', name=None):
+        logging.debug("Plugin name: %s", str(pluginobject.name))
+        plugin = pluginobject.load()
+        if "sub" in plugin and "pub" in plugin:
+            queue.add_sub(plugin['sub'], plugin)
+            queue.add_pub(plugin['sub'], plugin['pub'], plugin['name'])
+    return queue
+
 def run(url, database, view, starting_point):
     """Used to run the plugins that are installed based on the starting point
     @param url Base url for the CouchDB instance your monitoring
@@ -30,18 +48,8 @@ def run(url, database, view, starting_point):
     @param starting_point The starting point of the plugins
 
     """
-    queue = Queue()
-    for pluginobject in iter_ep(group='sundaytasks.plugin', name=None):
-        logging.debug("Plugin name: %s", str(pluginobject.name))
-        plugin = pluginobject.load()
-        if "sub" in plugin and "pub" in plugin:
-            queue.add_sub(plugin['sub'], plugin)
-            queue.add_pub(plugin['sub'], plugin['pub'], plugin['name'])
-    extensions = {"provider": {},"exit":{}}
-    for extobject in iter_ep(group='sundaytasks.extension', name=None):
-        logging.debug("Extension name: %s", str(extobject.name))
-        extension = extobject.load()
-        extensions[extension['type']][extobject.name] = extension
+    queue = get_plugins()
+    extensions = get_extensions()
     allpluginspub = queue.get_all_pub()
     allpluginssub = queue.get_all_sub()
     logging.debug("allplugins pub: %s", str(allpluginspub))
