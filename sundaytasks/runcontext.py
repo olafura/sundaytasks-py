@@ -7,6 +7,13 @@ import traceback
 import logging
 
 @gen.coroutine
+def get_provider(provider, extensions, doc):
+    receiver = extensions["provider"][provider]['receiver']
+    provider_res = yield receiver(doc)
+    logging.debug("provider response: %s", str(provider_res))
+    raise gen.Return(provider_res)
+
+@gen.coroutine
 def callback(plugin, parent, doc, provider):
     """This function handles calling the plugins and spawning new plugins
     based on the event system
@@ -28,9 +35,7 @@ def callback(plugin, parent, doc, provider):
     par_ext = parent.extensions
     try:
         if provider:
-            receiver = par_ext["provider"][provider]['receiver']
-            provider_res = yield receiver(doc)
-            logging.debug("provider response: %s", str(provider_res))
+            provider_res = yield get_provider(provider, par_ext, doc)
             args[provider] = provider_res
         response = yield plugin['receiver'](args)
     except Exception, e:
