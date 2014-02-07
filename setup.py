@@ -10,5 +10,5 @@ setup(
     author_email='olafura@olafura.com',
     packages=find_packages(),
     include_package_data=True,
-    scripts=['scripts/stasks'],
+    scripts=['scripts/stasks','scripts/sundaytask_test_plugin'],
 )
