@@ -38,6 +38,7 @@ def callback(plugin, parent, doc, provider):
         sys.exc_clear()
     if response:
         logging.debug("callback response: %s", str(response))
+        exit_res = ""
         if "exit" in plugin:
             logging.debug("exit")
             try:
