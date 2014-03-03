@@ -5,8 +5,9 @@ import sys
 from pkg_resources import iter_entry_points as iter_ep
 import json
 import logging
-import sundaytasks.main as st_main
 from sundaytasks.runcontext import get_provider
+from sundaytasks.utils import get_provider
+from sundaytasks.utils import get_extensions
 import argparse
 from tornado.escape import json_decode as jd
 FORMAT = '%(asctime)s %(funcName)s %(levelname)-8s %(message)s'
@@ -35,7 +36,7 @@ def single(plugin, doc):
     instance.start()
 
 if __name__ == "__main__":
-    EXTENSIONS = st_main.get_extensions()
+    EXTENSIONS = get_extensions()
     #logging.debug("Extensions: %s", str(EXTENSIONS))
     instance = IOLoop.instance()
     description = """Test plugin tests the plugin to see if it works
