@@ -1,7 +1,7 @@
 import subprocess
 
 def main():
-    args = ["python", "changes.py", "http://localhost:5984", "prufa"]
+    args = ["python", "changes.py", "http://localhost:5984", "test", "rules/type"]
     changes = subprocess.Popen(args,
                    stdout=subprocess.PIPE,
                    )
