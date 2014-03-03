@@ -1,17 +1,11 @@
 from tornado.stack_context import StackContext
 from tornado import gen
 from tornado.ioloop import IOLoop
+from sundaytasks.utils import get_provider
 import contextlib
 import sys
 import traceback
 import logging
-
-@gen.coroutine
-def get_provider(provider, extensions, doc):
-    receiver = extensions["provider"][provider]['receiver']
-    provider_res = yield receiver(doc)
-    logging.debug("provider response: %s", str(provider_res))
-    raise gen.Return(provider_res)
 
 @gen.coroutine
 def callback(plugin, parent, doc, provider):
