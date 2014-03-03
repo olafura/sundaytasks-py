@@ -21,9 +21,10 @@ class Changes(object):
     @param database The name of the database to monitor
 
     """
-    def __init__(self, url, database):
+    def __init__(self, url, database, view):
         self._url = url
         self._database = database
+        self._view = view
         self._seq = 0
         self._nid = 0
         self._run()
@@ -34,6 +35,8 @@ class Changes(object):
         """
         url = self._url+"/"+self._database
         url += "/_changes?feed=eventsource&include_docs=true"
+        if not self._view == "False":
+            url += "&filter=_view&view=" + self._view
         req = httpclient.HTTPRequest(
             url=url,
             streaming_callback=self.handle_event,
@@ -88,6 +91,7 @@ def main():
     if len(sys.argv) > 1:
         arg_url = sys.argv[1]
         arg_database = sys.argv[2]
+        arg_view = sys.argv[3]
         instance = IOLoop.instance()
         def shuttingdown(sig, frame):
             logging.info("Stopping SundayTasks Changes: %s", sig)
@@ -95,7 +99,7 @@ def main():
         signal.signal(signal.SIGINT, shuttingdown)
         signal.signal(signal.SIGTERM, shuttingdown)
         try:
-            Changes(arg_url, arg_database)
+            Changes(arg_url, arg_database, arg_view)
             instance.start()
         except Exception, e:
             logging.debug("Exception main: %s", str(e))
