@@ -40,7 +40,7 @@ def run(url, database, view, starting_point):
     logging.debug("extensions: %s", str(extensions))
     package_directory = os.path.dirname(os.path.abspath(__file__))
     changespath = os.path.join(package_directory, "changes.py")
-    args = ["python", changespath, url, database]
+    args = ["python", changespath, url, database, view]
     changes = subprocess.Popen(args,
                    stdout=subprocess.PIPE,
                    )
