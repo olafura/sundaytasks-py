@@ -6,6 +6,7 @@ import contextlib
 import sys
 import traceback
 import logging
+import re
 
 @gen.coroutine
 def callback(plugin, parent, doc, provider):
@@ -116,6 +117,8 @@ class RunContext(object):
         logging.debug("key: %s", str(key))
         plugins = self.queue.get_sub(key)
         logging.debug("plugins: %s", str(plugins))
+	if re.match(r"^_design", doc['_id']):
+            return
         for plugin in plugins:
             logging.debug("plugin_name: %s", str(plugin['name']))
             with StackContext(self.handle_events):
