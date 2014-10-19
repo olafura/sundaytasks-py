@@ -9,7 +9,7 @@ import logging
 import re
 
 @gen.coroutine
-def callback(plugin, parent, doc, provider):
+def callback(plugin, parent, doc, provider, url, database):
     """This function handles calling the plugins and spawning new plugins
     based on the event system
 
@@ -21,6 +21,11 @@ def callback(plugin, parent, doc, provider):
 
     @param provider An optional provider which gets some data for you from
                     CouchDB like tokens
+
+    @param url The url of CouchDB instance
+
+    @param database The database
+
     """
     logging.debug("callback: %s", str(plugin['name']))
     logging.debug("doc: %s", str(doc))
@@ -45,7 +50,7 @@ def callback(plugin, parent, doc, provider):
             try:
                 receiver = par_ext["exit"][plugin['exit']]['receiver']
                 exit_res = yield receiver(doc, response, plugin['namespace'],
-                                          plugin['url'], plugin["database"])
+                                          url, database)
             except Exception, e:
                 logging.debug("Exception: %s", str(e))
                 traceback.print_exc()
@@ -87,12 +92,18 @@ class RunContext(object):
 
     @param start The starting point used to decide where to begin
 
+    @param url The url of CouchDB instance
+
+    @param database The database
+
     """
-    def __init__(self, queue, extensions, doc, start):
+    def __init__(self, queue, extensions, doc, start, url, database):
         self.finished = {}
         self.response = {}
         self.queue = queue
         self.extensions = extensions
+        self.url = url
+        self.database = database
         self.run(start, doc)
 
     @contextlib.contextmanager
@@ -126,8 +137,8 @@ class RunContext(object):
                 if "provider" in plugin:
                     provider = plugin["provider"]
                     instance.run_sync(lambda:
-                                      callback(plugin, self, doc, provider), 5)
+                                      callback(plugin, self, doc, provider, self.url, self.database), 5)
                 else:
                     instance.run_sync(lambda:
-                                      callback(plugin, self, doc, False), 5)
+                                      callback(plugin, self, doc, False, self.url, self.database), 5)
                 instance.start()

@@ -17,7 +17,6 @@ setup(
         simple2 = simple_plugin2:PLUGIN
         simple3 = simple_plugin3:PLUGIN
         simple4 = simple_plugin4:PLUGIN
-        plugin_facebook = facebook_plugin:PLUGIN
     """,
     zip_safe = False
 )

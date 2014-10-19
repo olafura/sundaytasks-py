@@ -9,6 +9,7 @@ from tornado import gen
 from tornado import httpclient
 from tornado.ioloop import IOLoop
 from tornado.escape import json_decode
+import socket
 import re
 import sys
 import signal
@@ -21,12 +22,19 @@ class Changes(object):
     @param database The name of the database to monitor
 
     """
-    def __init__(self, url, database, view):
+    def __init__(self, url, database, view, port):
         self._url = url
         self._database = database
         self._view = view
         self._seq = 0
         self._nid = 0
+        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        logging.debug("Connecting to: %s",str(port))
+        try:
+            self.sock.connect(port)
+        except socket.error, msg:
+            logging.debug("Error: %s",str(msg))
+            sys.exit(1) 
         self._run()
 
     def _run(self):
@@ -64,14 +72,16 @@ class Changes(object):
             nid = int(secondline.strip().split(":")[1])
             if nid > self._nid:
                 self._nid = nid
-                match = re.search("data: (?P<value>.*)", response)
+                match = re.search("data: {(?P<value>.*)}", response)
                 if match:
                     value = match.group("value")
-                    json_value = json_decode(value)
+                    json_value = json_decode("{"+value+"}")
                     seq = int(json_value['seq'])
                     if seq > self._seq:
-                        sys.stdout.write(value+"\n")
-                        sys.stdout.flush()
+                        value = "{"+value
+                        value += ", \"url\": \""+self._url
+                        value += "\", \"database\": \""+self._database+"\"}"
+                        self.sock.sendall(value+"\n")
                         self._seq = seq
 
     def async_callback(self, response):
@@ -84,26 +94,23 @@ class Changes(object):
         logging.debug("async_callback: %s", str(response))
         self._run()
 
-def main():
+def main(url, database, view, port):
     """The main running function
 
     """
-    if len(sys.argv) > 1:
-        arg_url = sys.argv[1]
-        arg_database = sys.argv[2]
-        arg_view = sys.argv[3]
-        instance = IOLoop.instance()
-        def shuttingdown(sig, frame):
-            logging.info("Stopping SundayTasks Changes: %s", sig)
-            instance.stop()
-        signal.signal(signal.SIGINT, shuttingdown)
-        signal.signal(signal.SIGTERM, shuttingdown)
-        try:
-            Changes(arg_url, arg_database, arg_view)
-            instance.start()
-        except Exception, e:
-            logging.debug("Exception main: %s", str(e))
-            pass
+    instance = IOLoop.instance()
+    def shuttingdown(sig, frame):
+        logging.info("Stopping SundayTasks Changes: %s", sig)
+        instance.stop()
+        sys.exit(0)
+    signal.signal(signal.SIGINT, shuttingdown)
+    signal.signal(signal.SIGTERM, shuttingdown)
+    try:
+        Changes(url, database, view, port)
+        instance.start()
+    except Exception, e:
+        logging.debug("Exception main: %s", str(e))
+        pass
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()

@@ -7,10 +7,11 @@ passes on to the plugins from certain starting point.
 @author Olafur Arason <olafura@olafura.com>
 
 """
-from tornado import gen
+from tornado import gen, ioloop, iostream, netutil
 from tornado.ioloop import IOLoop
 from tornado.stack_context import StackContext
 from tornado.escape import json_decode
+from functools import partial
 import sys
 import os
 from pkg_resources import iter_entry_points as iter_ep
@@ -23,39 +24,53 @@ import traceback
 import logging
 import signal
 
-def run(url, database, view, starting_point):
-    """Used to run the plugins that are installed based on the starting point
-    @param url Base url for the CouchDB instance your monitoring
-    @param database Name of the database to monitor
-    @param view View to filter by
-    @param starting_point The starting point of the plugins
+class Main(object):
 
-    """
-    queue = get_plugins()
-    extensions = get_extensions()
-    allpluginspub = queue.get_all_pub()
-    allpluginssub = queue.get_all_sub()
-    logging.debug("allplugins pub: %s", str(allpluginspub))
-    logging.debug("allplugins sub: %s", str(allpluginssub))
-    logging.debug("extensions: %s", str(extensions))
-    package_directory = os.path.dirname(os.path.abspath(__file__))
-    changespath = os.path.join(package_directory, "changes.py")
-    args = ["python", changespath, url, database, view]
-    changes = subprocess.Popen(args,
-                   stdout=subprocess.PIPE,
-                   )
-    def shuttingdown(sig, frame):
-        logging.info("Stopping SundayTasks: %s", sig)
-        changes.kill()
-    signal.signal(signal.SIGINT, shuttingdown)
-    signal.signal(signal.SIGTERM, shuttingdown)
-    for response in iter(changes.stdout.readline, ''):
-        logging.debug("line")
-        logging.debug("response: %s", str(response))
-        json_response = json_decode(response)
+    def __init__(self, usocket, starting_point):
+        """Used to run the plugins that are installed based on the starting point
+        @param socket Unix socket you are watching
+        @param starting_point The starting point of the plugins
+
+        """
+        self.queue = get_plugins()
+        self.extensions = get_extensions()
+        self.starting_point = starting_point
+        self.instance = IOLoop.instance()
+        unix_socket = netutil.bind_unix_socket(usocket)
+        netutil.add_accept_handler(unix_socket, self.accept)
+        def shuttingdown(sig, frame):
+            logging.info("Stopping SundayTasks: %s", sig)
+            self.instance.stop()
+        signal.signal(signal.SIGINT, shuttingdown)
+        signal.signal(signal.SIGTERM, shuttingdown)
+        self.instance.start()
+
+    @contextlib.contextmanager
+    def handle_events(self):
+        """This function provides the context that the plugins are running in
+
+        """
         try:
-            runcontext = RunContext(queue, extensions, json_response["doc"],
-                        starting_point)
+            yield
+        except Exception, e:
+            logging.debug("Exception handle: %s", str(e))
+            traceback.print_exc()
+
+    def accept(self, connection, address):
+        stream = iostream.IOStream(connection)
+        callback = partial(self.readmessage, stream)
+        stream.read_until("\n", callback)
+
+    def readmessage(self, stream, message):
+        self.instance = IOLoop.instance()
+        json_response = json_decode(message)
+        try:
+            runcontext = RunContext(self.queue, self.extensions, json_response["doc"],
+                        self.starting_point, json_response["url"], json_response["database"])
+            self.instance.start()
         except Exception, e:
             logging.debug("Exception main: %s", str(e))
             traceback.print_exc()
+        callback = partial(self.readmessage, stream)
+        stream.read_until("\n", callback)
+

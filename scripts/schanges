@@ -1,23 +1,24 @@
 #!/usr/bin/env python
-import sundaytasks.main
+import sundaytasks.changes
 import logging
 import argparse
 FORMAT = '%(asctime)s %(funcName)s %(levelname)-8s %(message)s'
 LEVEL = logging.INFO
 
 if __name__ == "__main__":
-    description = """SundayTask runs your changes on CouchDB through a
-    plugin system set up by you. It watches for changes from the schanges
-    program that is tied to the same Unix socket.
+    description = """SundayTask changes watches a CouchDB instance for
+    changes and passes them to stasks though a socket, this allows for
+    multiple watchers for a single pipeline.
     """
     parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('--url', help='The base url to watch',
+                         default='http://localhost:5984')
+    parser.add_argument('--db', help='The database to watch',
+                         default='testing')
     parser.add_argument('-v', '--view', help='The view to filter',
                          default="False")
-    parser.add_argument('-s', '--start',
-                         help='The starting point for plugins',
-                         default='start')
     parser.add_argument('--socket',
-                         help='The unix socket to tie to',
+                         help='Unix socket port to write to',
                          default='/tmp/stask.sock')
     parser.add_argument('-d', '--debug', action='store_true',
                          help='Turn on Debug')
@@ -25,4 +26,4 @@ if __name__ == "__main__":
     if args.debug:
         LEVEL = logging.DEBUG
         logging.basicConfig(format = FORMAT, level = LEVEL)
-    main = sundaytasks.main.Main(args.socket, args.start)
+    sundaytasks.changes.main(args.url, args.db, args.view, args.socket)
