@@ -11,6 +11,7 @@ from tornado import gen, ioloop, iostream, netutil
 from tornado.ioloop import IOLoop
 from tornado.stack_context import StackContext
 from tornado.escape import json_decode
+import socket
 from functools import partial
 import sys
 import os
@@ -45,24 +46,13 @@ class Main(object):
         signal.signal(signal.SIGTERM, shuttingdown)
         self.instance.start()
 
-    @contextlib.contextmanager
-    def handle_events(self):
-        """This function provides the context that the plugins are running in
-
-        """
-        try:
-            yield
-        except Exception, e:
-            logging.debug("Exception handle: %s", str(e))
-            traceback.print_exc()
-
     def accept(self, connection, address):
         stream = iostream.IOStream(connection)
         callback = partial(self.readmessage, stream)
         stream.read_until("\n", callback)
 
     def readmessage(self, stream, message):
-        self.instance = IOLoop.instance()
+        logging.debug("Message: %s", message)
         json_response = json_decode(message)
         try:
             runcontext = RunContext(self.queue, self.extensions, json_response["doc"],
@@ -71,6 +61,4 @@ class Main(object):
         except Exception, e:
             logging.debug("Exception main: %s", str(e))
             traceback.print_exc()
-        callback = partial(self.readmessage, stream)
-        stream.read_until("\n", callback)
 

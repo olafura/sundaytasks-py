@@ -22,19 +22,13 @@ class Changes(object):
     @param database The name of the database to monitor
 
     """
-    def __init__(self, url, database, view, port):
+    def __init__(self, url, database, view, usocket):
         self._url = url
         self._database = database
         self._view = view
         self._seq = 0
         self._nid = 0
-        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        logging.debug("Connecting to: %s",str(port))
-        try:
-            self.sock.connect(port)
-        except socket.error, msg:
-            logging.debug("Error: %s",str(msg))
-            sys.exit(1) 
+        self._usocket = usocket
         self._run()
 
     def _run(self):
@@ -78,10 +72,19 @@ class Changes(object):
                     json_value = json_decode("{"+value+"}")
                     seq = int(json_value['seq'])
                     if seq > self._seq:
+                        logging.debug("New seq")
                         value = "{"+value
                         value += ", \"url\": \""+self._url
                         value += "\", \"database\": \""+self._database+"\"}"
-                        self.sock.sendall(value+"\n")
+                        logging.debug("Connecting to: %s",str(self._usocket))
+                        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                        try:
+                            sock.connect(self._usocket)
+                        except socket.error, msg:
+                            logging.debug("Error: %s",str(msg))
+                            sys.exit(1)
+                        sock.sendall(value+"\n")
+                        sock.close()
                         self._seq = seq
 
     def async_callback(self, response):
@@ -94,7 +97,7 @@ class Changes(object):
         logging.debug("async_callback: %s", str(response))
         self._run()
 
-def main(url, database, view, port):
+def main(url, database, view, usocket):
     """The main running function
 
     """
@@ -106,7 +109,7 @@ def main(url, database, view, port):
     signal.signal(signal.SIGINT, shuttingdown)
     signal.signal(signal.SIGTERM, shuttingdown)
     try:
-        Changes(url, database, view, port)
+        Changes(url, database, view, usocket)
         instance.start()
     except Exception, e:
         logging.debug("Exception main: %s", str(e))

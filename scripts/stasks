@@ -11,8 +11,6 @@ if __name__ == "__main__":
     program that is tied to the same Unix socket.
     """
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('-v', '--view', help='The view to filter',
-                         default="False")
     parser.add_argument('-s', '--start',
                          help='The starting point for plugins',
                          default='start')
