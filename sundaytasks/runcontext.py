@@ -97,13 +97,14 @@ class RunContext(object):
     @param database The database
 
     """
-    def __init__(self, queue, extensions, doc, start, url, database):
+    def __init__(self, queue, extensions, doc, start, url, database, allow_design):
         self.finished = {}
         self.response = {}
         self.queue = queue
         self.extensions = extensions
         self.url = url
         self.database = database
+        self.allow_design = allow_design
         self.run(start, doc)
 
     @contextlib.contextmanager
@@ -128,7 +129,7 @@ class RunContext(object):
         logging.debug("key: %s", str(key))
         plugins = self.queue.get_sub(key)
         logging.debug("plugins: %s", str(plugins))
-	if re.match(r"^_design", doc['_id']):
+	if not self.allow_design and re.match(r"^_design", doc['_id']):
             return
         for plugin in plugins:
             logging.debug("plugin_name: %s", str(plugin['name']))
@@ -137,8 +138,8 @@ class RunContext(object):
                 if "provider" in plugin:
                     provider = plugin["provider"]
                     instance.run_sync(lambda:
-                                      callback(plugin, self, doc, provider, self.url, self.database), 5)
+                                      callback(plugin, self, doc, provider, self.url, self.database), 30)
                 else:
                     instance.run_sync(lambda:
-                                      callback(plugin, self, doc, False, self.url, self.database), 5)
+                                      callback(plugin, self, doc, False, self.url, self.database), 30)
                 instance.start()

@@ -22,13 +22,14 @@ class Changes(object):
     @param database The name of the database to monitor
 
     """
-    def __init__(self, url, database, view, usocket):
+    def __init__(self, url, database, view, usocket, no_doc):
         self._url = url
         self._database = database
         self._view = view
         self._seq = 0
         self._nid = 0
         self._usocket = usocket
+        self._no_doc = no_doc
         self._run()
 
     def _run(self):
@@ -36,7 +37,10 @@ class Changes(object):
 
         """
         url = self._url+"/"+self._database
-        url += "/_changes?feed=eventsource&include_docs=true"
+        if not self._no_doc:
+            url += "/_changes?feed=eventsource&include_docs=true"
+        else:
+            url += "/_changes?feed=eventsource"
         if not self._view == "False":
             url += "&filter=_view&view=" + self._view
         req = httpclient.HTTPRequest(
@@ -64,16 +68,23 @@ class Changes(object):
         if len(lines) > 2:
             secondline = lines[1]
             nid = int(secondline.strip().split(":")[1])
+            logging.debug("nid: %s", str(nid))
+            logging.debug("self._nid: %s", str(self._nid))
             if nid > self._nid:
                 self._nid = nid
                 match = re.search("data: {(?P<value>.*)}", response)
                 if match:
+                    logging.debug("match")
                     value = match.group("value")
                     json_value = json_decode("{"+value+"}")
                     seq = int(json_value['seq'])
+                    logging.debug("seq: %s", str(seq))
+                    logging.debug("self._seq: %s", str(self._seq))
                     if seq > self._seq:
                         logging.debug("New seq")
                         value = "{"+value
+                        if self._no_doc:
+                            value += ", \"doc\": {\"_id\": \""+json_value['id']+"\"}"
                         value += ", \"url\": \""+self._url
                         value += "\", \"database\": \""+self._database+"\"}"
                         logging.debug("Connecting to: %s",str(self._usocket))
@@ -83,6 +94,7 @@ class Changes(object):
                         except socket.error, msg:
                             logging.debug("Error: %s",str(msg))
                             sys.exit(1)
+                        logging.debug("sent value: %s", value)
                         sock.sendall(value+"\n")
                         sock.close()
                         self._seq = seq
@@ -97,7 +109,7 @@ class Changes(object):
         logging.debug("async_callback: %s", str(response))
         self._run()
 
-def main(url, database, view, usocket):
+def main(url, database, view, usocket, no_doc):
     """The main running function
 
     """
@@ -109,7 +121,7 @@ def main(url, database, view, usocket):
     signal.signal(signal.SIGINT, shuttingdown)
     signal.signal(signal.SIGTERM, shuttingdown)
     try:
-        Changes(url, database, view, usocket)
+        Changes(url, database, view, usocket, no_doc)
         instance.start()
     except Exception, e:
         logging.debug("Exception main: %s", str(e))
