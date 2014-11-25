@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='sundaytasks',
-    version='0.03',
+    version='0.04',
 
     description='SundayTasks is pluggable architecture for CouchDB',
 
