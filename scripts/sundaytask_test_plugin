@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from tornado import gen, ioloop
+from tornado import gen, ioloop, httpclient
 from tornado.ioloop import IOLoop
 import sys
 from pkg_resources import iter_entry_points as iter_ep
@@ -49,13 +49,22 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.plugin:
         if args.doc:
-            instance.run_sync(lambda: single(args.plugin, jd(args.doc)))
+            if args.doc[:4] == "http":
+                http_client = httpclient.HTTPClient()
+                try:
+                    response = http_client.fetch(args.doc)
+                except httpclient.HTTPError as e:
+                    print("Error: %s", str(e))
+                doc = response.body
+                instance.run_sync(lambda: single(args.plugin, jd(doc)))
+            else:
+                instance.run_sync(lambda: single(args.plugin, jd(args.doc)))
         else:
             instance.run_sync(lambda: single(args.plugin, False))
     else:
         for object in iter_ep(group='sundaytasks.plugin', name=None):
             logging.debug("plugin: %s", str(object.name))
             plugin = object.load()
-            instance.add_callback(callback=lambda: main(plugin))
+            instance.add_callback(callback=lambda: main(plugin, args))
 
         instance.start()
