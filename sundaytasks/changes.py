@@ -112,7 +112,7 @@ class Changes(object):
         logging.debug("async_callback: %s", str(response))
         self._run()
 
-def main(url, database, view, usocket, no_doc):
+def main(url, database, view, usocket, no_doc, filter):
     """The main running function
 
     """
@@ -124,7 +124,7 @@ def main(url, database, view, usocket, no_doc):
     signal.signal(signal.SIGINT, shuttingdown)
     signal.signal(signal.SIGTERM, shuttingdown)
     try:
-        Changes(url, database, view, usocket, no_doc)
+        Changes(url, database, view, usocket, no_doc, filter)
         instance.start()
     except Exception, e:
         logging.debug("Exception main: %s", str(e))
