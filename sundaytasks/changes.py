@@ -22,10 +22,11 @@ class Changes(object):
     @param database The name of the database to monitor
 
     """
-    def __init__(self, url, database, view, usocket, no_doc):
+    def __init__(self, url, database, view, usocket, no_doc, filter):
         self._url = url
         self._database = database
         self._view = view
+        self._filter = filter
         self._seq = 0
         self._nid = 0
         self._usocket = usocket
@@ -43,6 +44,8 @@ class Changes(object):
             url += "/_changes?feed=eventsource"
         if not self._view == "False":
             url += "&filter=_view&view=" + self._view
+        if not self._filter == "False":
+            url += "&filter=" + self._filter
         req = httpclient.HTTPRequest(
             url=url,
             streaming_callback=self.handle_event,
