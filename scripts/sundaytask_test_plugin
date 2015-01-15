@@ -37,6 +37,7 @@ def main(plugin, args):
 @gen.coroutine
 def single(plugin, doc, url, database, exit):
     iplugin = __import__("%s" % plugin)
+    print iplugin
     plugin = iplugin.PLUGIN
     if not doc:
         doc = {"_id": "testing", "username": "testing"}
@@ -76,10 +77,7 @@ if __name__ == "__main__":
                 except httpclient.HTTPError as e:
                     print("Error: %s", str(e))
                 doc = response.body
-                if args.exit:
-                    instance.run_sync(lambda: single(args.plugin, jd(doc), args.url, args.database))
-                else:
-                    instance.run_sync(lambda: single(args.plugin, jd(doc), args.url, args.database, exit))
+                instance.run_sync(lambda: single(args.plugin, jd(doc), args.url, args.database, args.exit))
             else:
                 instance.run_sync(lambda: single(args.plugin, jd(args.doc)))
         else:
