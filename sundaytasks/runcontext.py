@@ -31,7 +31,7 @@ def callback(plugin, parent, doc, provider, url, database):
     logging.debug("doc: %s", str(doc))
     logging.debug("provider: %s", str(provider))
     response = False
-    args = {"doc": doc}
+    args = {"doc": doc, "url": url, "database": database}
     par_ext = parent.extensions
     try:
         if provider:
