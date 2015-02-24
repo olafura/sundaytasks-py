@@ -4,9 +4,9 @@ from pkg_resources import iter_entry_points as iter_ep
 import logging
 
 @gen.coroutine
-def get_provider(provider, extensions, doc):
+def get_provider(provider, extensions, doc, url, database):
     receiver = extensions["provider"][provider]['receiver']
-    provider_res = yield receiver(doc)
+    provider_res = yield receiver(doc, url, database)
     logging.debug("provider response: %s", str(provider_res))
     raise gen.Return(provider_res)
 

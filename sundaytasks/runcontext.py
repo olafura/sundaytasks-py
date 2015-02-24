@@ -31,11 +31,11 @@ def callback(plugin, parent, doc, provider, url, database):
     logging.debug("doc: %s", str(doc))
     logging.debug("provider: %s", str(provider))
     response = False
-    args = {"doc": doc, "url": url, "database": database}
     par_ext = parent.extensions
+    args = {"doc": doc}
     try:
         if provider:
-            provider_res = yield get_provider(provider, par_ext, doc)
+            provider_res = yield get_provider(provider, par_ext, doc, url, database)
             args[provider] = provider_res
         response = yield plugin['receiver'](args)
     except Exception, e:
