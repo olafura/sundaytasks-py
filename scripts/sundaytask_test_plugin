@@ -21,7 +21,13 @@ def main(plugin, args):
     res_copy = copy.copy(response)
     for key in res_copy:
         value = res_copy[key]
-        if len(value) > 100:
+        if type(value) is dict:
+            for key2 in value:
+                value2 = value[key2]
+                if len(value2) > 100:
+                    value[key2] = "Too long to display"
+            res_copy[key] = value
+        elif len(value) > 100:
             res_copy[key] = "Too long to display"
     logging.debug("Results: \n%s", json.dumps(res_copy, sort_keys=True,
     indent=4, separators=(',', ': ')))
@@ -41,7 +47,13 @@ def main(plugin, args):
     exit_res_copy = copy.copy(exit_res)
     for key in exit_res_copy:
         value = exit_res_copy[key]
-        if len(value) > 100:
+        if type(value) is dict:
+            for key2 in value:
+                value2 = value[key2]
+                if len(value2) > 100:
+                    value[key2] = "Too long to display"
+            res_copy[key] = value
+        elif len(value) > 100:
             exit_res_copy[key] = "Too long to display"
     logging.debug("Exit results: \n%s", json.dumps(exit_res))
 
