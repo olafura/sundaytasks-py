@@ -2,12 +2,29 @@ from tornado import gen
 from sundaytasks.queue import Queue
 from pkg_resources import iter_entry_points as iter_ep
 import logging
+import copy
+
+@gen.coroutine
+def striped_copy(origin_dict):
+    dict_copy = copy.copy(origin_dict)
+    for key in dict_copy:
+        value = dict_copy[key]
+        if type(value) is dict:
+            for key2 in value:
+                value2 = value[key2]
+                if len(value2) > 100:
+                    value[key2] = "Too long to display"
+            dict_copy[key] = value
+        elif len(value) > 100:
+            dict_copy[key] = "Too long to display"
+    raise gen.Return(dict_copy)
 
 @gen.coroutine
 def get_provider(provider, extensions, doc, url, database):
     receiver = extensions["provider"][provider]['receiver']
     provider_res = yield receiver(doc, url, database)
-    logging.debug("provider response: %s", str(provider_res))
+    provider_res_copy = yield striped_copy(provider_res)
+    logging.debug("provider response: %s", str(provider_res_copy))
     raise gen.Return(provider_res)
 
 def get_extensions():

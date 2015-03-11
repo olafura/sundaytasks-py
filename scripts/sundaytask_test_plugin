@@ -7,6 +7,7 @@ import json
 import logging
 from sundaytasks.utils import get_provider
 from sundaytasks.utils import get_extensions
+from sundaytasks.utils import striped_copy
 import argparse
 from tornado.escape import json_decode as jd
 import traceback
@@ -18,17 +19,7 @@ logging.basicConfig(format = FORMAT, level = LEVEL)
 @gen.coroutine
 def main(plugin, args):
     response = yield plugin['receiver'](args)
-    res_copy = copy.copy(response)
-    for key in res_copy:
-        value = res_copy[key]
-        if type(value) is dict:
-            for key2 in value:
-                value2 = value[key2]
-                if len(value2) > 100:
-                    value[key2] = "Too long to display"
-            res_copy[key] = value
-        elif len(value) > 100:
-            res_copy[key] = "Too long to display"
+    res_copy = yield striped_copy(response)
     logging.debug("Results: \n%s", json.dumps(res_copy, sort_keys=True,
     indent=4, separators=(',', ': ')))
     exit_res = {}
@@ -44,17 +35,7 @@ def main(plugin, args):
             logging.debug("Exception: %s", str(e))
             traceback.print_exc()
             sys.exc_clear()
-    exit_res_copy = copy.copy(exit_res)
-    for key in exit_res_copy:
-        value = exit_res_copy[key]
-        if type(value) is dict:
-            for key2 in value:
-                value2 = value[key2]
-                if len(value2) > 100:
-                    value[key2] = "Too long to display"
-            exit_res_copy[key] = value
-        elif len(value) > 100:
-            exit_res_copy[key] = "Too long to display"
+    exit_res_copy = yield striped_copy(exit_res)
     logging.debug("Exit results: \n%s", json.dumps(exit_res_copy))
 
 @gen.coroutine
@@ -69,17 +50,7 @@ def single(plugin, doc, url, database, exit):
         provider = plugin["provider"]
         provider_res = yield get_provider(provider, EXTENSIONS, doc, url, database)
         args[provider] = provider_res
-    args_copy = copy.copy(args)
-    for key in args_copy:
-        value = args_copy[key]
-        if type(value) is dict:
-            for key2 in value:
-                value2 = value[key2]
-                if len(value2) > 100:
-                    value[key2] = "Too long to display"
-            args_copy[key] = value
-        elif len(value) > 100:
-            args_copy[key] = "Too long to display"
+    args_copy = yield striped_copy(args)
     logging.debug("args: %s", str(args_copy))
     instance.add_callback(callback=lambda: main(plugin, args))
     instance.start()
