@@ -10,6 +10,7 @@ from sundaytasks.utils import get_extensions
 import argparse
 from tornado.escape import json_decode as jd
 import traceback
+import copy
 FORMAT = '%(asctime)s %(funcName)s %(levelname)-8s %(message)s'
 LEVEL = logging.DEBUG
 logging.basicConfig(format = FORMAT, level = LEVEL)
@@ -17,9 +18,14 @@ logging.basicConfig(format = FORMAT, level = LEVEL)
 @gen.coroutine
 def main(plugin, args):
     response = yield plugin['receiver'](args)
-    logging.debug("Results: \n%s", json.dumps(response, sort_keys=True,
+    res_copy = copy.copy(response)
+    for key in res_copy:
+        value = res_copy[key]
+        if len(value) > 100:
+            res_copy[key] = "Too long to display"
+    logging.debug("Results: \n%s", json.dumps(res_copy, sort_keys=True,
     indent=4, separators=(',', ': ')))
-    exit_res = ""
+    exit_res = {}
     if "exit" in args and "exit" in plugin:
         url = args["url"]
         database = args["database"]
@@ -32,6 +38,11 @@ def main(plugin, args):
             logging.debug("Exception: %s", str(e))
             traceback.print_exc()
             sys.exc_clear()
+    exit_res_copy = copy.copy(exit_res)
+    for key in exit_res_copy:
+        value = exit_res_copy[key]
+        if len(value) > 100:
+            exit_res_copy[key] = "Too long to display"
     logging.debug("Exit results: \n%s", json.dumps(exit_res))
 
 @gen.coroutine
