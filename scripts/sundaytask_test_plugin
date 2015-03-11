@@ -55,7 +55,7 @@ def main(plugin, args):
             exit_res_copy[key] = value
         elif len(value) > 100:
             exit_res_copy[key] = "Too long to display"
-    logging.debug("Exit results: \n%s", json.dumps(exit_res))
+    logging.debug("Exit results: \n%s", json.dumps(exit_res_copy))
 
 @gen.coroutine
 def single(plugin, doc, url, database, exit):
@@ -69,7 +69,18 @@ def single(plugin, doc, url, database, exit):
         provider = plugin["provider"]
         provider_res = yield get_provider(provider, EXTENSIONS, doc, url, database)
         args[provider] = provider_res
-    logging.debug("args: %s", str(args))
+    args_copy = copy.copy(args)
+    for key in args_copy:
+        value = args_copy[key]
+        if type(value) is dict:
+            for key2 in value:
+                value2 = value[key2]
+                if len(value2) > 100:
+                    value[key2] = "Too long to display"
+            args_copy[key] = value
+        elif len(value) > 100:
+            args_copy[key] = "Too long to display"
+    logging.debug("args: %s", str(args_copy))
     instance.add_callback(callback=lambda: main(plugin, args))
     instance.start()
 
