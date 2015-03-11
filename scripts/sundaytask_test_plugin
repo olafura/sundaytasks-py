@@ -52,7 +52,7 @@ def main(plugin, args):
                 value2 = value[key2]
                 if len(value2) > 100:
                     value[key2] = "Too long to display"
-            res_copy[key] = value
+            exit_res_copy[key] = value
         elif len(value) > 100:
             exit_res_copy[key] = "Too long to display"
     logging.debug("Exit results: \n%s", json.dumps(exit_res))
