@@ -12,8 +12,8 @@ def striped_copy(origin_dict):
         if type(value) is dict:
             for key2 in value:
                 value2 = value[key2]
-                if len(value2) > 100:
-                    value[key2] = "Too long to display"
+                if type(value2) is str and len(value2) > 100:
+                        value[key2] = "Too long to display"
             dict_copy[key] = value
         elif type(value) is str and len(value) > 100:
             dict_copy[key] = "Too long to display"
