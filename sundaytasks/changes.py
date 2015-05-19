@@ -55,7 +55,7 @@ class Changes(object):
         http_client = httpclient.AsyncHTTPClient()
         try:
             http_client.fetch(req, self.async_callback)
-        except Exception, e:
+        except Exception as e:
             logging.debug("Exception: %s",str(e))
             pass
 
@@ -94,7 +94,7 @@ class Changes(object):
                         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
                         try:
                             sock.connect(self._usocket)
-                        except socket.error, msg:
+                        except socket.error as msg:
                             logging.debug("Error: %s",str(msg))
                             sys.exit(1)
                         logging.debug("sent value: %s", value)
@@ -126,7 +126,7 @@ def main(url, database, view, usocket, no_doc, filter):
     try:
         Changes(url, database, view, usocket, no_doc, filter)
         instance.start()
-    except Exception, e:
+    except Exception as e:
         logging.debug("Exception main: %s", str(e))
         pass
 

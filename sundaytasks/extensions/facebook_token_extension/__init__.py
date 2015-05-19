@@ -12,7 +12,7 @@ def receiver(doc):
     user = False
     try:
         user = yield db.get_doc("org.couchdb.user:%s" % username)
-    except couch.NotFound, e:
+    except couch.NotFound as e:
         logging.debug("Couch exception: %s", str(e))
     if user and "facebook" in user:
         facebook = user["facebook"]

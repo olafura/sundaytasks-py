@@ -16,7 +16,7 @@ def receiver(doc, changes, namespace, url, database):
     response = ""
     try:
         response = yield db.save_doc(doc)
-    except Exception, e:
+    except Exception as e:
         logging.debug("Couch exception: %s", str(e))
     raise gen.Return(response)
 

@@ -38,7 +38,7 @@ def callback(plugin, parent, doc, provider, url, database):
             provider_res = yield get_provider(provider, par_ext, doc, url, database)
             args[provider] = provider_res
         response = yield plugin['receiver'](args)
-    except Exception, e:
+    except Exception as e:
         logging.debug("Exception: %s", str(e))
         traceback.print_exc()
         sys.exc_clear()
@@ -51,7 +51,7 @@ def callback(plugin, parent, doc, provider, url, database):
                 receiver = par_ext["exit"][plugin['exit']]['receiver']
                 exit_res = yield receiver(doc, response, plugin['namespace'],
                                           url, database)
-            except Exception, e:
+            except Exception as e:
                 logging.debug("Exception: %s", str(e))
                 traceback.print_exc()
                 sys.exc_clear()
@@ -114,7 +114,7 @@ class RunContext(object):
         """
         try:
             yield
-        except Exception, e:
+        except Exception as e:
             logging.debug("Exception handle: %s", str(e))
             traceback.print_exc()
 

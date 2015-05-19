@@ -66,7 +66,7 @@ class Main(object):
             runcontext = RunContext(self.queue, self.extensions, json_response["doc"],
                         self.starting_point, json_response["url"], json_response["database"], self._allow_design)
             self.instance.start()
-        except Exception, e:
+        except Exception as e:
             logging.debug("Exception main: %s", str(e))
             traceback.print_exc()
 
