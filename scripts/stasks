@@ -5,10 +5,9 @@ import argparse
 import signal
 FORMAT = '%(asctime)s %(funcName)s %(levelname)-8s %(message)s'
 LEVEL = logging.INFO
-main = False
 
 def signal_handler(signum, frame):
-    logging.info("Received Signal: %s at frame: %s" % (signum, frame))
+    logging.info("Received Signal: %s at frame: %s", signum, frame)
 
     if signum == signal.SIGTERM:
         logging.info('Received request to terminate daemon (SIGTERM)')
@@ -27,18 +26,18 @@ if __name__ == "__main__":
     """
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('-s', '--start',
-                         help='The starting point for plugins',
-                         default='start')
+                        help='The starting point for plugins',
+                        default='start')
     parser.add_argument('--socket',
-                         help='The unix socket to tie to',
-                         default='/tmp/stask.sock')
+                        help='The unix socket to tie to',
+                        default='/tmp/stask.sock')
     parser.add_argument('-a', '--allow_design', action='store_true',
-                         help='Allow design documents')
+                        help='Allow design documents')
     parser.add_argument('-d', '--debug', action='store_true',
-                         help='Turn on Debug')
+                        help='Turn on Debug')
     args = parser.parse_args()
     if args.debug:
         LEVEL = logging.DEBUG
-        logging.basicConfig(format = FORMAT, level = LEVEL)
+        logging.basicConfig(format=FORMAT, level=LEVEL)
     main = sundaytasks.main.Main(args.socket, args.start, args.allow_design)
     main.start()

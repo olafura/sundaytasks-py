@@ -22,11 +22,11 @@ class Changes(object):
     @param database The name of the database to monitor
 
     """
-    def __init__(self, url, database, view, usocket, no_doc, filter):
+    def __init__(self, url, database, view, usocket, no_doc, thefilter):
         self._url = url
         self._database = database
         self._view = view
-        self._filter = filter
+        self._filter = thefilter
         self._seq = 0
         self._nid = 0
         self._usocket = usocket
@@ -56,8 +56,7 @@ class Changes(object):
         try:
             http_client.fetch(req, self.async_callback)
         except Exception as e:
-            logging.debug("Exception: %s",str(e))
-            pass
+            logging.debug("Exception: %s", str(e))
 
     def handle_event(self, response):
         """Handle event gets the data from the changes feed and prints it out
@@ -90,12 +89,12 @@ class Changes(object):
                             value += ", \"doc\": {\"_id\": \""+json_value['id']+"\"}"
                         value += ", \"url\": \""+self._url
                         value += "\", \"database\": \""+self._database+"\"}"
-                        logging.debug("Connecting to: %s",str(self._usocket))
+                        logging.debug("Connecting to: %s", str(self._usocket))
                         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
                         try:
                             sock.connect(self._usocket)
                         except socket.error as msg:
-                            logging.debug("Error: %s",str(msg))
+                            logging.debug("Error: %s", str(msg))
                             sys.exit(1)
                         logging.debug("sent value: %s", value)
                         sock.sendall(value+"\n")
@@ -112,7 +111,7 @@ class Changes(object):
         logging.debug("async_callback: %s", str(response))
         self._run()
 
-def main(url, database, view, usocket, no_doc, filter):
+def main(url, database, view, usocket, no_doc, thefilter):
     """The main running function
 
     """
@@ -124,11 +123,10 @@ def main(url, database, view, usocket, no_doc, filter):
     signal.signal(signal.SIGINT, shuttingdown)
     signal.signal(signal.SIGTERM, shuttingdown)
     try:
-        Changes(url, database, view, usocket, no_doc, filter)
+        Changes(url, database, view, usocket, no_doc, thefilter)
         instance.start()
     except Exception as e:
         logging.debug("Exception main: %s", str(e))
-        pass
 
 #if __name__ == "__main__":
 #    main()

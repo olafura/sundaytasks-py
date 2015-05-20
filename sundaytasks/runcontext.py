@@ -129,7 +129,7 @@ class RunContext(object):
         logging.debug("key: %s", str(key))
         plugins = self.queue.get_sub(key)
         logging.debug("plugins: %s", str(plugins))
-	if not self.allow_design and re.match(r"^_design", doc['_id']):
+        if not self.allow_design and re.match(r"^_design", doc['_id']):
             return
         for plugin in plugins:
             logging.debug("plugin_name: %s", str(plugin['name']))

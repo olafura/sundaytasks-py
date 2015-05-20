@@ -63,8 +63,9 @@ class Main(object):
         logging.debug("Message: %s", message)
         json_response = json_decode(message)
         try:
-            runcontext = RunContext(self.queue, self.extensions, json_response["doc"],
-                        self.starting_point, json_response["url"], json_response["database"], self._allow_design)
+            RunContext(self.queue, self.extensions, json_response["doc"],
+                       self.starting_point, json_response["url"],
+                       json_response["database"], self._allow_design)
             self.instance.start()
         except Exception as e:
             logging.debug("Exception main: %s", str(e))

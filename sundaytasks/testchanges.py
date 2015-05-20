@@ -2,9 +2,7 @@ import subprocess
 
 def main():
     args = ["python", "changes.py", "http://localhost:5984", "test", "rules/type"]
-    changes = subprocess.Popen(args,
-                   stdout=subprocess.PIPE,
-                   )
+    changes = subprocess.Popen(args, stdout=subprocess.PIPE,)
     for response in iter(changes.stdout.readline, ''):
         print(response)
 

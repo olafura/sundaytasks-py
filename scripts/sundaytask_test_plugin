@@ -11,17 +11,17 @@ from sundaytasks.utils import striped_copy
 import argparse
 from tornado.escape import json_decode as jd
 import traceback
-import copy
+
 FORMAT = '%(asctime)s %(funcName)s %(levelname)-8s %(message)s'
 LEVEL = logging.DEBUG
-logging.basicConfig(format = FORMAT, level = LEVEL)
+logging.basicConfig(format=FORMAT, level=LEVEL)
 
 @gen.coroutine
-def main(plugin, args):
+def multi(plugin, args):
     response = yield plugin['receiver'](args)
     res_copy = yield striped_copy(response)
     logging.debug("Results: \n%s", json.dumps(res_copy, sort_keys=True,
-    indent=4, separators=(',', ': ')))
+                                              indent=4, separators=(',', ': ')))
     exit_res = {}
     if "exit" in args and "exit" in plugin:
         url = args["url"]
@@ -31,7 +31,7 @@ def main(plugin, args):
             receiver = EXTENSIONS["exit"][plugin['exit']]['receiver']
             exit_res = yield receiver(args['doc'], response, plugin['namespace'],
                                       url, database)
-        except Exception, e:
+        except Exception as e:
             logging.debug("Exception: %s", str(e))
             traceback.print_exc()
             sys.exc_clear()
@@ -39,39 +39,36 @@ def main(plugin, args):
     logging.debug("Exit results: \n%s", json.dumps(exit_res_copy))
 
 @gen.coroutine
-def single(plugin, doc, url, database, exit):
+def single(plugin, doc, url, database, exit_mod):
     iplugin = __import__("%s" % plugin)
     print iplugin
     plugin = iplugin.PLUGIN
     if not doc:
         doc = {"_id": "testing", "username": "testing"}
-    args = {"doc": doc, "url": url, "database": database, "exit": exit}
+    args = {"doc": doc, "url": url, "database": database, "exit": exit_mod}
     if "provider" in plugin:
         provider = plugin["provider"]
         provider_res = yield get_provider(provider, EXTENSIONS, doc, url, database)
         args[provider] = provider_res
     args_copy = yield striped_copy(args)
     logging.debug("args: %s", str(args_copy))
-    instance.add_callback(callback=lambda: main(plugin, args))
+    instance.add_callback(callback=lambda: multi(plugin, args))
     instance.start()
 
-if __name__ == "__main__":
-    EXTENSIONS = get_extensions()
-    #logging.debug("Extensions: %s", str(EXTENSIONS))
-    instance = IOLoop.instance()
+def main():
     description = """Test plugin tests the plugin to see if it works
     """
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('-p','--plugin', help='Plugin to test',
-                         default=False)
-    parser.add_argument('-d','--doc', help='Document to give',
-                         default=False)
+    parser.add_argument('-p', '--plugin', help='Plugin to test',
+                        default=False)
+    parser.add_argument('-d', '--doc', help='Document to give',
+                        default=False)
     parser.add_argument('--url', help='Url to use',
-                         default=False)
+                        default=False)
     parser.add_argument('--database', help='Database to use',
-                         default=False)
+                        default=False)
     parser.add_argument('-e', '--exit', action='store_true',
-                         help='Turn on exit, requires url and database')
+                        help='Turn on exit, requires url and database')
     args = parser.parse_args()
     if args.plugin:
         if args.doc:
@@ -84,13 +81,19 @@ if __name__ == "__main__":
                 doc = response.body
                 instance.run_sync(lambda: single(args.plugin, jd(doc), args.url, args.database, args.exit))
             else:
-                instance.run_sync(lambda: single(args.plugin, jd(args.doc)))
+                instance.run_sync(lambda: single(args.plugin, jd(args.doc), False, False, False))
         else:
-            instance.run_sync(lambda: single(args.plugin, False))
+            instance.run_sync(lambda: single(args.plugin, False, False, False, False))
     else:
-        for object in iter_ep(group='sundaytasks.plugin', name=None):
-            logging.debug("plugin: %s", str(object.name))
-            plugin = object.load()
-            instance.add_callback(callback=lambda: main(plugin, args))
+        for pobject in iter_ep(group='sundaytasks.plugin', name=None):
+            logging.debug("plugin: %s", str(pobject.name))
+            plugin = pobject.load()
+            instance.add_callback(callback=lambda: multi(plugin, args))
 
         instance.start()
+
+if __name__ == "__main__":
+    EXTENSIONS = get_extensions()
+    #logging.debug("Extensions: %s", str(EXTENSIONS))
+    instance = IOLoop.instance()
+    main()

@@ -12,22 +12,22 @@ if __name__ == "__main__":
     """
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('--url', help='The base url to watch',
-                         default='http://localhost:5984')
+                        default='http://localhost:5984')
     parser.add_argument('--db', help='The database to watch',
-                         default='testing')
+                        default='testing')
     parser.add_argument('-v', '--view', help='The view to filter',
-                         default="False")
+                        default="False")
     parser.add_argument('-f', '--filter', help='The filter to use',
-                         default="False")
+                        default="False")
     parser.add_argument('-n', '--no_doc', action='store_true',
-                         help='Don\'t include the doc')
+                        help='Don\'t include the doc')
     parser.add_argument('--socket',
-                         help='Unix socket port to write to',
-                         default='/tmp/stask.sock')
+                        help='Unix socket port to write to',
+                        default='/tmp/stask.sock')
     parser.add_argument('-d', '--debug', action='store_true',
-                         help='Turn on Debug')
+                        help='Turn on Debug')
     args = parser.parse_args()
     if args.debug:
         LEVEL = logging.DEBUG
-        logging.basicConfig(format = FORMAT, level = LEVEL)
+        logging.basicConfig(format=FORMAT, level=LEVEL)
     sundaytasks.changes.main(args.url, args.db, args.view, args.socket, args.no_doc, args.filter)
