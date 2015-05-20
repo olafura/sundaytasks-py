@@ -16,5 +16,5 @@
 
 """SundayTasks is pluggable task architecture for CouchDB"""
 
-version = "0.01"
-version_info = (0, 0, 1)
+version = "0.04"
+version_info = (0, 0, 4)
